@@ -2,6 +2,8 @@ import { Request, Response, NextFunction } from "express";
 import { userRegisterValidator, userSigninValidator } from "../validator/user.validator";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+
+
 export const userRegisterController = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const result = userRegisterValidator.safeParse(req.body);
