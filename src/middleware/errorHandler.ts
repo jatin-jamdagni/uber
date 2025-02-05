@@ -1,6 +1,12 @@
-import { Request, Response } from 'express';
+// src/middleware/errorHandler.ts
+import { Request, Response, NextFunction } from 'express';
 
-export const errorHandler = async (err: Error, req: Request, res: Response): Promise<any> => {
-    console.error(err.stack);
-    return res.status(500).send('Something broke!');
+export const errorHandler = (
+    err: Error,
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    console.error(err);
+    res.status(500).json({ error: "Something broken!" });
 };

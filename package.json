@@ -5,7 +5,7 @@
     "private": true,
     "main": "index.js",
     "scripts": {
-        "dev": "nodemon --watch 'src/**' --ext 'ts,json' --exec 'npm run build && npm run start'",
+        "dev":"nodemon --watch \"src/**\" --ext \"ts,json\" --exec \"npm run build && npm run start\"",
         "build": "tsc",
         "start": "node dist/index.js"
     },
@@ -28,7 +28,7 @@
         "@types/express": "^5.0.0",
         "@types/jsonwebtoken": "^9.0.8",
         "@types/node": "^20.12.12",
-        "nodemon": "^3.1.0",
+        "nodemon": "^3.1.9",
         "typescript": "^5.4.5"
     }
 }
