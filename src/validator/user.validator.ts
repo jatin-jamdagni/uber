@@ -13,8 +13,6 @@ export const userRegisterValidator = z.object({
 export type UserRegisterBody = z.infer<typeof userRegisterValidator>;
 
 
-
-
 // Signin Types
 export const userSigninValidator = z.object({
     email: z.string().email(),

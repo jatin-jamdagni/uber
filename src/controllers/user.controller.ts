@@ -1,60 +1,126 @@
-import { Request, Response, NextFunction } from "express";
-import { userRegisterValidator, userSigninValidator } from "../validator/user.validator";
-import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
+import type { Request, Response, NextFunction } from "express"
+import { type UserRegisterBody, userRegisterValidator, userSigninValidator } from "../validator/user.validator"
+import bcrypt from "bcryptjs"
+import jwt from "jsonwebtoken"
 
+const HTTP_STATUS = {
+    OK: 200,
+    CREATED: 201,
+    BAD_REQUEST: 400,
+    UNAUTHORIZED: 401,
+    INTERNAL_SERVER_ERROR: 500,
+}
 
-export const userRegisterController = async (req: Request, res: Response, next: NextFunction) => {
+const MESSAGES = {
+    USER_REGISTERED: "User registered successfully",
+    USER_EXISTS: "User already exists",
+    USER_SIGNED_IN: "User signed in successfully",
+    USER_NOT_FOUND: "User does not exist",
+    INVALID_CREDENTIALS: "Invalid email or password",
+    LOGOUT_SUCCESS: "Logout successful",
+}
+
+export const userRegisterController = async (
+    req: Request<{}, {}, UserRegisterBody>,
+    res: Response,
+    next: NextFunction,
+): Promise<any> => {
     try {
-        const result = userRegisterValidator.safeParse(req.body);
+        const result = userRegisterValidator.safeParse(req.body)
 
         if (!result.success) {
-            return res.status(400).json({ error: result.error.issues });
+            return res.status(HTTP_STATUS.BAD_REQUEST).json({ error: result.error.issues })
         }
 
-        const validatedData = result.data;
-        const existUser = await req.prisma.user.findFirst({ where: { email: validatedData.email } });
+        const { email, password, firstName, lastName } = result.data
+        const existingUser = await req.prisma.user.findUnique({ where: { email } })
 
-        if (existUser) {
-            return res.status(400).json({ error: "User already exists" });
+        if (existingUser) {
+            return res.status(HTTP_STATUS.BAD_REQUEST).json({ error: MESSAGES.USER_EXISTS })
         }
 
-        validatedData.password = await bcrypt.hash(validatedData.password, 10);
+        const hashedPassword = await bcrypt.hash(password, 10)
 
-        await req.prisma.user.create({ data: validatedData });
+        await req.prisma.user.create({
+            data: {
+                email,
+                password: hashedPassword,
+                firstName,
+                lastName,
+            },
+        })
 
-        return res.status(201).json({ message: "User registered successfully" });
+        res.status(HTTP_STATUS.CREATED).json({ message: MESSAGES.USER_REGISTERED })
     } catch (error) {
-        next(error); // Pass errors to Express error handler
+        next(error)
     }
-};
+}
 
-export const userSigninController = async (req: Request, res: Response, next: NextFunction) => {
+export const userSigninController = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
     try {
-        const result = userSigninValidator.safeParse(req.body);
+        const result = userSigninValidator.safeParse(req.body)
 
         if (!result.success) {
-            return res.status(400).json({ error: result.error.issues });
+            return res.status(HTTP_STATUS.BAD_REQUEST).json({ error: result.error.issues })
         }
 
-        const validatedData = result.data;
-        const userExist = await req.prisma.user.findUnique({ where: { email: validatedData.email } });
+        const { email, password } = result.data
 
-        if (!userExist) {
-            return res.status(401).json({ error: "User does not exist" });
+        const user = await req.prisma.user.findUnique({ where: { email } })
+        if (!user) {
+            return res.status(HTTP_STATUS.UNAUTHORIZED).json({ error: MESSAGES.USER_NOT_FOUND })
         }
 
-        const isPasswordValid = await bcrypt.compare(validatedData.password, userExist.password);
-
+        const isPasswordValid = await bcrypt.compare(password, user.password)
         if (!isPasswordValid) {
-            return res.status(401).json({ error: "Invalid email or password" });
+            return res.status(HTTP_STATUS.UNAUTHORIZED).json({ error: MESSAGES.INVALID_CREDENTIALS })
         }
 
-        const token = jwt.sign({ id: userExist.id }, process.env.JWT_SECRET!, { expiresIn: "7d" });
-        const { password, id, ...user } = userExist;
+        const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET!, { expiresIn: "24h" })
 
-        return res.status(200).json({ message: "User signed in successfully", user, token });
+        const { password: _, ...userWithoutPassword } = user
+
+        res.cookie("token", token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            maxAge: 3600000, // 1 hour
+        })
+
+        res.status(HTTP_STATUS.OK).json({
+            message: MESSAGES.USER_SIGNED_IN,
+            user: userWithoutPassword,
+            token,
+        })
     } catch (error) {
-        next(error);
+        next(error)
     }
-};
+}
+
+export const getUserProfileController = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
+    try {
+        if (!req.user) {
+            return res.status(HTTP_STATUS.UNAUTHORIZED).json({ error: "User not authenticated" })
+        }
+        res.status(HTTP_STATUS.OK).json(req.user)
+    } catch (error) {
+        next(error)
+    }
+}
+
+export const userLogoutController = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
+    try {
+        res.clearCookie("token")
+        const token = req.cookies.token || (req.headers.authorization?.split(" ")[1] ?? null)
+
+        if (token) {
+            await req.prisma.blacklistedToken.create({
+                data: { token },
+            })
+        }
+
+       return res.status(HTTP_STATUS.OK).json({ message: MESSAGES.LOGOUT_SUCCESS })
+    } catch (error) {
+        next(error)
+    }
+}
+
