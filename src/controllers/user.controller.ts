@@ -2,23 +2,9 @@ import type { Request, Response, NextFunction } from "express"
 import { type UserRegisterBody, userRegisterValidator, userSigninValidator } from "../validator/user.validator"
 import bcrypt from "bcryptjs"
 import jwt from "jsonwebtoken"
+import { HTTP_STATUS, MESSAGES } from "../libs/constants"
 
-const HTTP_STATUS = {
-    OK: 200,
-    CREATED: 201,
-    BAD_REQUEST: 400,
-    UNAUTHORIZED: 401,
-    INTERNAL_SERVER_ERROR: 500,
-}
 
-const MESSAGES = {
-    USER_REGISTERED: "User registered successfully",
-    USER_EXISTS: "User already exists",
-    USER_SIGNED_IN: "User signed in successfully",
-    USER_NOT_FOUND: "User does not exist",
-    INVALID_CREDENTIALS: "Invalid email or password",
-    LOGOUT_SUCCESS: "Logout successful",
-}
 
 export const userRegisterController = async (
     req: Request<{}, {}, UserRegisterBody>,
@@ -41,7 +27,7 @@ export const userRegisterController = async (
 
         const hashedPassword = await bcrypt.hash(password, 10)
 
-        await req.prisma.user.create({
+        const user = await req.prisma.user.create({
             data: {
                 email,
                 password: hashedPassword,
@@ -50,12 +36,40 @@ export const userRegisterController = async (
             },
         })
 
-        res.status(HTTP_STATUS.CREATED).json({ message: MESSAGES.USER_REGISTERED })
+        const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET!, { expiresIn: "24h" })
+
+        const { password: _, ...userWithoutPassword } = user;
+
+        return res.status(HTTP_STATUS.CREATED).json({ message: MESSAGES.USER_REGISTERED, user: userWithoutPassword, token }).cookie("token", token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            maxAge: 3600000, // 1 hour
+        })
+
     } catch (error) {
-        next(error)
+        return  next(error)
     }
 }
 
+/**
+ * Controller for user sign-in.
+ *
+ * @param req - Express request object.
+ * @param res - Express response object.
+ * @param next - Express next middleware function.
+ * @returns A promise that resolves to any.
+ *
+ * @description
+ * This controller handles the user sign-in process. It performs the following steps:
+ * 1. Validates the request body using `userSigninValidator`.
+ * 2. Checks if the user exists in the database using the provided email.
+ * 3. Verifies the provided password against the stored hashed password.
+ * 4. Generates a JWT token if the credentials are valid.
+ * 5. Sets the JWT token in an HTTP-only cookie.
+ * 6. Responds with the user data (excluding the password) and the token.
+ *
+ * @throws Will call the next middleware with an error if any step fails.
+ */
 export const userSigninController = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
     try {
         const result = userSigninValidator.safeParse(req.body)
@@ -64,7 +78,7 @@ export const userSigninController = async (req: Request, res: Response, next: Ne
             return res.status(HTTP_STATUS.BAD_REQUEST).json({ error: result.error.issues })
         }
 
-        const { email, password } = result.data
+        const { email, password } = result.data!;
 
         const user = await req.prisma.user.findUnique({ where: { email } })
         if (!user) {
@@ -80,19 +94,24 @@ export const userSigninController = async (req: Request, res: Response, next: Ne
 
         const { password: _, ...userWithoutPassword } = user
 
+
+
+
         res.cookie("token", token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
-            maxAge: 3600000, // 1 hour
-        })
+            maxAge: 3600000,
+        });
 
-        res.status(HTTP_STATUS.OK).json({
+        // Now send the JSON response
+        return res.status(HTTP_STATUS.OK).json({
             message: MESSAGES.USER_SIGNED_IN,
             user: userWithoutPassword,
             token,
-        })
+        });
+
     } catch (error) {
-        next(error)
+        return next(error)
     }
 }
 
@@ -101,9 +120,11 @@ export const getUserProfileController = async (req: Request, res: Response, next
         if (!req.user) {
             return res.status(HTTP_STATUS.UNAUTHORIZED).json({ error: "User not authenticated" })
         }
-        res.status(HTTP_STATUS.OK).json(req.user)
+
+        const { password: _, ...user } = req.user!
+        return res.status(HTTP_STATUS.OK).json({ user: user })
     } catch (error) {
-        next(error)
+        return next(error)
     }
 }
 
@@ -118,9 +139,9 @@ export const userLogoutController = async (req: Request, res: Response, next: Ne
             })
         }
 
-       return res.status(HTTP_STATUS.OK).json({ message: MESSAGES.LOGOUT_SUCCESS })
+        return res.status(HTTP_STATUS.OK).json({ message: MESSAGES.LOGOUT_SUCCESS })
     } catch (error) {
-        next(error)
+        return next(error)
     }
 }
 

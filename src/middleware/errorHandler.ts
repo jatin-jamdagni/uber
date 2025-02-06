@@ -8,5 +8,6 @@ export const errorHandler = (
     next: NextFunction
 ) => {
     console.error(err);
+    
     res.status(500).json({ error: "Something broken!" });
 };
