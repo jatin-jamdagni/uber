@@ -52,11 +52,19 @@ export const captainRegisterController = async (req: Request<{}, {}, captainRegi
         const { password: _, ...captainWithoutPassword } = captain;
         const token = jwt.sign({ id: captain.id }, process.env.JWT_SECRET!, { expiresIn: "24h" })
 
-        return res.status(HTTP_STATUS.CREATED).json({ message: MESSAGES.CAPTAIN_REGISTERED, captain: captainWithoutPassword, token }).cookie("token", token, {
+        // return res.status(HTTP_STATUS.CREATED).json({ message: MESSAGES.CAPTAIN_REGISTERED, captain: captainWithoutPassword, token }).cookie("token", token, {
+        //     httpOnly: true,
+        //     secure: process.env.NODE_ENV === "production",
+        //     maxAge: 3600000,
+        // })
+        return res.cookie("token", token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
             maxAge: 3600000,
         })
+            .status(HTTP_STATUS.CREATED)
+            .json({ message: MESSAGES.CAPTAIN_REGISTERED, captain: captainWithoutPassword, token });
+
 
     } catch (error) {
         return next(error)
@@ -79,7 +87,7 @@ export const captainSigninController = async (req: Request<{}, {}, UserSigninBod
         if (!captain) {
             return res.status(HTTP_STATUS.UNAUTHORIZED).json({ error: MESSAGES.CAPTAIN_NOT_FOUND })
         }
-        
+
 
         const isPasswordValid = await bcrypt.compare(password, captain.password);
         if (!isPasswordValid) {
@@ -134,7 +142,7 @@ export const captainLogoutController = async (req: Request, res: Response, next:
 
         return res.status(HTTP_STATUS.OK).json({ message: MESSAGES.LOGOUT_SUCCESS })
     } catch (error) {
-        return  next(error)
+        return next(error)
     }
 }
 

@@ -41,11 +41,11 @@ const userRegisterController = async (req, res, next) => {
         });
         const token = jsonwebtoken_1.default.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: "24h" });
         const { password: _ } = user, userWithoutPassword = __rest(user, ["password"]);
-        return res.status(constants_1.HTTP_STATUS.CREATED).json({ message: constants_1.MESSAGES.USER_REGISTERED, user: userWithoutPassword, token }).cookie("token", token, {
+        return res.cookie("token", token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
             maxAge: 3600000, // 1 hour
-        });
+        }).status(constants_1.HTTP_STATUS.CREATED).json({ message: constants_1.MESSAGES.USER_REGISTERED, user: userWithoutPassword, token });
     }
     catch (error) {
         return next(error);

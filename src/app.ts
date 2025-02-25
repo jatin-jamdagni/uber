@@ -8,6 +8,7 @@ import userRouter from "./routes/user.routes";
 import { errorHandler } from "./middleware/errorHandler";
 import cookieParser from 'cookie-parser'
 import captainRouter from "./routes/captain.routes";
+import mapsRouter from "./routes/maps.routes";
 
 const app = express();
 
@@ -24,7 +25,7 @@ app.get('/', (req: Request, res: Response) => {
 });
 app.use("/api/v1/user", userRouter);
 app.use("/api/v1/captain", captainRouter);
-
+app.use("/api/v1/maps", mapsRouter);
 
 
 app.use(errorHandler);

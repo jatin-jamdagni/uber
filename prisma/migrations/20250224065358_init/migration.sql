@@ -4,8 +4,19 @@ CREATE TYPE "Status" AS ENUM ('ACTIVE', 'INACTIVE');
 -- CreateEnum
 CREATE TYPE "VehicleType" AS ENUM ('CAR', 'BIKE', 'AUTO');
 
--- AlterTable
-ALTER TABLE "BlacklistedToken" ALTER COLUMN "expiresAt" SET DEFAULT now() + interval '24 hours';
+-- CreateTable
+CREATE TABLE "User" (
+    "id" SERIAL NOT NULL,
+    "email" TEXT NOT NULL,
+    "firstName" TEXT NOT NULL,
+    "lastName" TEXT,
+    "password" TEXT NOT NULL,
+    "socketId" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "User_pkey" PRIMARY KEY ("id")
+);
 
 -- CreateTable
 CREATE TABLE "Captain" (
@@ -44,6 +55,19 @@ CREATE TABLE "Location" (
     CONSTRAINT "Location_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "BlacklistedToken" (
+    "id" SERIAL NOT NULL,
+    "token" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "expiresAt" TIMESTAMP(3) NOT NULL DEFAULT now() + interval '24 hours',
+
+    CONSTRAINT "BlacklistedToken_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateIndex
+CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
+
 -- CreateIndex
 CREATE UNIQUE INDEX "Captain_email_key" ON "Captain"("email");
 
@@ -52,6 +76,9 @@ CREATE UNIQUE INDEX "Vehicle_captainId_key" ON "Vehicle"("captainId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Location_captainId_key" ON "Location"("captainId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "BlacklistedToken_token_key" ON "BlacklistedToken"("token");
 
 -- AddForeignKey
 ALTER TABLE "Vehicle" ADD CONSTRAINT "Vehicle_captainId_fkey" FOREIGN KEY ("captainId") REFERENCES "Captain"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

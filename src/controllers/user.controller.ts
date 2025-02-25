@@ -40,14 +40,14 @@ export const userRegisterController = async (
 
         const { password: _, ...userWithoutPassword } = user;
 
-        return res.status(HTTP_STATUS.CREATED).json({ message: MESSAGES.USER_REGISTERED, user: userWithoutPassword, token }).cookie("token", token, {
+        return res.cookie("token", token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
             maxAge: 3600000, // 1 hour
-        })
+        }).status(HTTP_STATUS.CREATED).json({ message: MESSAGES.USER_REGISTERED, user: userWithoutPassword, token })
 
     } catch (error) {
-        return  next(error)
+        return next(error)
     }
 }
 
