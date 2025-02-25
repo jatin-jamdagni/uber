@@ -15,7 +15,7 @@ export const userRegisterController = async (
         const result = userRegisterValidator.safeParse(req.body)
 
         if (!result.success) {
-            return res.status(HTTP_STATUS.BAD_REQUEST).json({ error: result.error.issues })
+            return res.status(HTTP_STATUS.BAD_REQUEST).json({ error: result.error.issues[0].message })
         }
 
         const { email, password, firstName, lastName } = result.data
@@ -75,7 +75,7 @@ export const userSigninController = async (req: Request, res: Response, next: Ne
         const result = userSigninValidator.safeParse(req.body)
 
         if (!result.success) {
-            return res.status(HTTP_STATUS.BAD_REQUEST).json({ error: result.error.issues })
+            return res.status(HTTP_STATUS.BAD_REQUEST).json({ error: result.error.issues[0].message })
         }
 
         const { email, password } = result.data!;

@@ -10,7 +10,7 @@ export const captainRegisterController = async (req: Request<{}, {}, captainRegi
     const result = captainRegisterValidator.safeParse(req.body);
 
     if (!result.success) {
-        return res.status(HTTP_STATUS.BAD_REQUEST).json({ error: result.error.issues })
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({ error: result.error.issues[0].message })
     }
     try {
 
@@ -78,7 +78,7 @@ export const captainSigninController = async (req: Request<{}, {}, UserSigninBod
 
 
     if (!result.success) {
-        return res.status(HTTP_STATUS.BAD_REQUEST).json({ error: result.error.issues })
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({ error: result.error.issues[0].message })
     }
 
     try {
