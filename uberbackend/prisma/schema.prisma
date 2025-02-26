@@ -27,6 +27,8 @@ model User {
   socketId  String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  Ride Ride[]
 }
 
 model Captain {
@@ -41,6 +43,7 @@ model Captain {
   location  Location?
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
+  Ride      Ride[]
 }
 
 model Vehicle {
@@ -66,4 +69,29 @@ model BlacklistedToken {
   token     String   @unique
   createdAt DateTime @default(now())
   expiresAt DateTime @default(dbgenerated("now() + interval '24 hours'"))
+}
+
+enum RideStatus {
+  PENDING
+  ACCEPTED
+  COMPLETED
+  CANCELLED
+  ONGOING
+}
+
+model Ride {
+  id          Int        @id @default(autoincrement())
+  user        User       @relation(fields: [userId], references: [id])
+  userId      Int
+  captain     Captain    @relation(fields: [captainId], references: [id])
+  captainId   Int
+  pickup      String
+  destination String
+  fare        Int
+  status      RideStatus @default(PENDING)
+  duration    Int
+  distance    Int
+  paymentId   String?
+  orderId     String?
+  signature   String?
 }

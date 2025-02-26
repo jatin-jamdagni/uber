@@ -9,6 +9,7 @@ import { errorHandler } from "./middleware/errorHandler";
 import cookieParser from 'cookie-parser'
 import captainRouter from "./routes/captain.routes";
 import mapsRouter from "./routes/maps.routes";
+import ridesRouter from "./routes/ride.routes";
 
 const app = express();
 
@@ -23,10 +24,12 @@ app.use(cookieParser());
 app.get('/', (req: Request, res: Response) => {
    res.send(`Hello world!`);
 });
+
+// v1
 app.use("/api/v1/user", userRouter);
 app.use("/api/v1/captain", captainRouter);
 app.use("/api/v1/maps", mapsRouter);
-
+app.use("/api/v1/rides", ridesRouter)
 
 app.use(errorHandler);
 
