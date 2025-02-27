@@ -1,18 +1,19 @@
-import React, { useState, useContext } from 'react'
-import { Link ,useNavigate} from 'react-router'
-import { UserDataContext } from '../context/UserContext'
- import axios from 'axios'
+import { useState, FormEvent } from 'react'
+import { Link, useNavigate } from 'react-router'
+import useUserContext from '../context/UserContext'
+import axios from 'axios'
+import { SignInResponse } from '../types'
 
 const UserLogin = () => {
-  const [ email, setEmail ] = useState('')
-  const [ password, setPassword ] = useState('')
- 
-  const { user, setUser } = useContext(UserDataContext)
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+
+  const { setUser } = useUserContext()
   const navigate = useNavigate()
 
 
 
-  const submitHandler = async (e) => {
+  const submitHandler = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     const userData = {
@@ -20,12 +21,14 @@ const UserLogin = () => {
       password: password
     }
 
-    const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/user/signin`, userData)
+    const response = await axios.post<SignInResponse>(`${import.meta.env.VITE_BASE_URL}/user/signin`, userData)
+
 
     if (response.status === 200) {
-      const data = response.data
-      setUser(data.user)
-      localStorage.setItem('token', data.token)
+      const { user, token } = response.data
+
+      setUser(user!)
+      localStorage.setItem('token', token)
       navigate('/home')
     }
 

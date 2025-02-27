@@ -43,23 +43,41 @@ export function initializeSocket(server: HttpServer): void {
                 const { userId, userType } = data;
 
                 if (userType === 'user') {
-                    await prisma.user.update({
-                        data: {
-                            socketId: socket.id
-                        },
-                        where: {
-                            id: userId
-                        }
-                    })
+                    try {
+
+ 
+                        const updatedUser = await prisma.user.update({
+                            data: {
+                                socketId: socket.id,
+                            },
+                            where: {
+                                id: userId,
+                            },
+                        });
+                        console.log(`Updated user ${updatedUser.id} with socketId: ${updatedUser.socketId}`);
+                    } catch (error) {
+                        console.error('Failed to update user:', error);
+                        socket.emit('error', { message: 'Failed to update user', error: error.message });
+                    }
                 } else if (userType === 'captain') {
-                    await prisma.captain.update({
-                        data: {
-                            socketId: socket.id
-                        },
-                        where: {
-                            id: userId
-                        }
-                    })
+
+                    try {
+
+
+                        const updatedCaptain = await prisma.captain.update({
+                            data: {
+                                socketId: socket.id
+                            },
+                            where: {
+                                id: userId
+                            }
+                        })
+                        console.log(`Updated captain ${updatedCaptain.id} with socketId: ${updatedCaptain.socketId}`);
+                    } catch (error) {
+                        console.error('Failed to update captain:', error);
+                        socket.emit('error', { message: 'Failed to update captain', error: error.message });
+                    }
+
                 }
             } catch (error) {
                 socket.emit('error', { message: 'Failed to join', error });
@@ -118,4 +136,3 @@ export function sendMessageToSocketId(socketId: string, messageObject: MessageOb
 
     io.to(socketId).emit(messageObject.event, messageObject.data);
 }
-

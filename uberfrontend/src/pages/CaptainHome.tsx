@@ -8,19 +8,29 @@ import axios from 'axios';
 import CaptainDetails from '../components/CaptainDetails';
 import RidePopUp from '../components/RidePopUp';
 import ConfirmRidePopUp from '../components/ConfirmRidePopUp';
+import { Ride } from '../types';
 
 const CaptainHome = () => {
     const [ridePopupPanel, setRidePopupPanel] = useState(false);
     const [confirmRidePopupPanel, setConfirmRidePopupPanel] = useState(false);
     const ridePopupPanelRef = useRef(null);
     const confirmRidePopupPanelRef = useRef(null);
-    const [ride, setRide] = useState<any>(null);
+    const [ride, setRide] = useState<Ride>({
+        id: null,
+        destination: "",
+        fare: null,
+        pickup: "",
+        user: {
+            firstName: "",
+            lastName: ""
+        }
+    });
 
     const { socket } = useSocketContext();
     const { captain } = useCaptainContext(); // Ensure captain context is properly used
 
     useEffect(() => {
-        if (!captain) return; // Ensure captain is available before proceeding
+        if (!captain) return;
 
         socket.emit('join', {
             userId: captain.id,
@@ -62,7 +72,7 @@ const CaptainHome = () => {
     async function confirmRide() {
         if (!ride) return; // Ensure ride data is available
 
-        const response = await axios.post(
+        await axios.post(
             `${import.meta.env.VITE_BASE_URL}/rides/confirm`,
             {
                 rideId: ride.id,

@@ -9,11 +9,20 @@ export interface Captain {
     createdAt: string; // ISO date string
     updatedAt: string; // ISO date string
 }
-
+export interface UserProps {
+    id: number;
+    email: string;
+    firstName: string;
+    lastName: string;
+    socketId: string | null;
+    createdAt: string;
+    updatedAt: string;
+}
 // Type for the response object
 export interface SignInResponse {
     message: string;
-    captain: Captain;
+    captain?: Captain;
+    user?: UserProps;
     token: string; // JWT token
 }
 
@@ -27,4 +36,24 @@ export interface ConfirmRideProps {
     setConfirmRidePanel: (value: boolean) => void;
     setVehicleFound: (value: boolean) => void;
     createRide: () => void;
+}
+
+
+
+export interface Ride {
+    id: number |null,
+    user: {
+        firstName: string;
+        lastName: string;
+    };
+    pickup: string;
+    destination: string;
+    fare: number | null;
+}
+
+export interface RidePopUpProps {
+    ride: Ride;
+    setConfirmRidePopupPanel: (value: boolean) => void;
+    setRidePopupPanel: (value: boolean) => void;
+    confirmRide: () => void;
 }

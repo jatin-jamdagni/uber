@@ -2,22 +2,9 @@ import { FormEvent, useState } from 'react';
 import { Link, useNavigate } from 'react-router'; // Make sure to use `react-router-dom` here
 import axios from 'axios';
 import useCaptainContext from '../context/CaptainContext';
+import { SignInResponse } from '../types';
 
-interface Captain {
-  id: number;
-  email: string;
-  firstName: string;
-  lastName: string;
-  socketId: string | null;
-  status: 'INACTIVE' | 'ACTIVE';
-  createdAt: string;
-  updatedAt: string;
-}
 
-interface SignInResponse {
-  captain: Captain;
-  token: string;
-}
 
 const Captainlogin = () => {
   const [email, setEmail] = useState('');
@@ -39,7 +26,8 @@ const Captainlogin = () => {
 
       if (response.status === 200) {
         const data = response.data;
-        setCaptain(data.captain);
+
+        setCaptain(data.captain!);
         localStorage.setItem('token', data.token);
         navigate('/captain-home');
       }

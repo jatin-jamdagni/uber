@@ -1,6 +1,6 @@
 import axios from 'axios';
-import { getCoordinatesBody, getDistanceTimeBody } from '../validator/maps.validator';
-
+import { getDistanceTimeBody } from '../validator/maps.validator';
+import { prisma } from "../libs/client"
 interface Coordinates {
     lat: number;
     lng: number;
@@ -82,4 +82,53 @@ export const getSuggestionsByInput = async (input: string): Promise<string[] | n
     }
 }
 
+export const getCaptainsInTheRadius = async (lat: number, lng: number, radius: number) => {
+    const allCaptains = await prisma.captain.findMany({
+        include: { location: true , vehicle: true},
+    });
 
+    const filteredCaptains = allCaptains.filter((captain) => {
+        if (!captain.location) return false;
+
+        const distance = haversineDistance(
+            lat, lng,
+            captain.location.latitude,
+            captain.location.longitude
+        );
+
+        return distance <= radius;
+    });
+
+    return filteredCaptains;
+};
+
+// Haversine Formula (Great-Circle Distance)
+const haversineDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+    const toRad = (value: number) => (value * Math.PI) / 180;
+    const R = 6371; // Earth's radius in km
+
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+    return R * c; // Distance in km
+};
+
+
+ 
+// export const getCaptainsInTheRadius = async (lat: number, lng: number, radius: number) => {
+//     const captains = await prisma.$queryRaw`
+//         SELECT * FROM "Captain"
+//         JOIN "Location" ON "Captain".id = "Location".captainId
+//         WHERE ST_DistanceSphere(
+//             ST_MakePoint("Location".longitude, "Location".latitude),
+//             ST_MakePoint(${lng}, ${lat})
+//         ) <= ${radius * 1000}  -- Convert km to meters
+//     `;
+    
+//     return captains;
+// };

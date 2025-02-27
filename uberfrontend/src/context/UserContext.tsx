@@ -1,48 +1,30 @@
 import {
   createContext,
   useState,
-  ReactNode,
   Dispatch,
   SetStateAction,
   useContext,
 } from "react";
+import { UserProps } from "../types";
 
-// User Props interface
-interface UserProps {
-  id: number;
-  email: string;
-  firstName: string;
-  lastName: string;
-  socketId: string | null;
-  createdAt: string;
-  updatedAt: string;
-}
-
-// UserDataContext interface
 interface UserDataContextProps {
   user: UserProps | null;
   setUser: Dispatch<SetStateAction<UserProps | null>>;
   isLoading?: boolean;
   setIsLoading?: Dispatch<SetStateAction<boolean>>;
-  error?: string | null;
-  setError?: Dispatch<SetStateAction<string | null>>;
+  error?: string;
+  setError?: Dispatch<SetStateAction<string>>;
 }
 
 // Create Context with a default value (can be undefined initially)
-export const UserDataContext = createContext<UserDataContextProps | undefined>(
-  undefined
-);
+export const UserDataContext = createContext<UserDataContextProps | undefined>(undefined);
 
-interface UserContextProps {
-  children: ReactNode;
-}
 
 // UserContext component to provide the state to children components
-export const UserContext = ({ children }: UserContextProps) => {
+export const UserContext = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<UserProps | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
+  const [error, setError] = useState<string>("");
   const value = {
     user,
     setUser,
@@ -59,7 +41,6 @@ export const UserContext = ({ children }: UserContextProps) => {
   );
 };
 
-// Custom hook to consume the context
 const useUserContext = () => {
   const context = useContext(UserDataContext);
   if (!context) {

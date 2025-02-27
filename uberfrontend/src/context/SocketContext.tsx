@@ -9,7 +9,7 @@ export const SocketContext = createContext<SocketContextType | undefined>(
   undefined
 );
 
-const socket = io(`${import.meta.env.VITE_BASE_URL}`);
+const socket = io(`${import.meta.env.VITE_SOCKET_URL}`);
 
 interface SocketProviderProps {
   children: ReactNode;
@@ -25,10 +25,10 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
       console.log("Disconnected from server");
     });
 
-    return () => {
-      socket.off("connect");
-      socket.off("disconnect");
-    };
+    // return () => {
+    //   socket.off("connect");
+    //   socket.off("disconnect");
+    // };
   }, []);
 
   return (
