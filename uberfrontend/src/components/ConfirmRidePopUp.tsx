@@ -2,7 +2,7 @@ import { FormEvent, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router";
 
-const ConfirmRidePopUp = (props) => {
+const ConfirmRidePopUp = (props: any) => {
   const [otp, setOtp] = useState("");
   const navigate = useNavigate();
 

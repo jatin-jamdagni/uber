@@ -33,7 +33,13 @@ app.use("/api/v1/rides", ridesRouter)
 
 app.use(errorHandler);
 
-app.use((req: Request, res: Response) => {
-   res.status(404).send('Not Found');
+// app.use((req: Request, res: Response) => {
+//    res.status(404).send('Not Found');
+// });
+
+
+process.on('unhandledRejection', (reason, promise) => {
+   console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+   // You can choose to log the error or take any other action like shutting down the process gracefully
 });
 export default app;

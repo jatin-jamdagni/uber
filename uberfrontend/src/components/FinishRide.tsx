@@ -1,9 +1,9 @@
- 
+
 import axios from 'axios'
 import { useNavigate } from 'react-router'
 
 
-const FinishRide = (props) => {
+const FinishRide = (props: any) => {
 
     const navigate = useNavigate()
 

@@ -1,5 +1,4 @@
-/* eslint-disable react-refresh/only-export-components */
-import { createContext, useEffect, ReactNode } from "react";
+import { createContext, useEffect, ReactNode, useContext } from "react";
 import { io, Socket } from "socket.io-client";
 
 interface SocketContextType {
@@ -16,7 +15,7 @@ interface SocketProviderProps {
   children: ReactNode;
 }
 
-const SocketProvider = ({ children }: SocketProviderProps) => {
+export const SocketProvider = ({ children }: SocketProviderProps) => {
   useEffect(() => {
     socket.on("connect", () => {
       console.log("Connected to server");
@@ -39,4 +38,16 @@ const SocketProvider = ({ children }: SocketProviderProps) => {
   );
 };
 
-export default SocketProvider;
+
+
+
+
+const useSocketContext = () => {
+  const context = useContext(SocketContext);
+  if (!context) {
+    throw new Error('useSocketContext must be used within a useSocketContext');
+  }
+  return context;
+};
+
+export default useSocketContext;

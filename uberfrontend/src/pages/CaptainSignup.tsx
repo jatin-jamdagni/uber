@@ -1,27 +1,27 @@
-import React, { useState } from 'react'
-import { Link,useNavigate } from 'react-router'
-import { CaptainDataContext } from '../context/CaptainContext'
- import axios from 'axios'
+import { FormEvent, useState } from 'react'
+import { Link, useNavigate } from 'react-router'
+import useCaptainContext from '../context/CaptainContext'
+import axios from 'axios'
 
 const CaptainSignup = () => {
 
   const navigate = useNavigate()
 
-  const [ email, setEmail ] = useState('')
-  const [ password, setPassword ] = useState('')
-  const [ firstName, setFirstName ] = useState('')
-  const [ lastName, setLastName ] = useState('')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
 
-  const [ vehicleColor, setVehicleColor ] = useState('')
-  const [ vehiclePlate, setVehiclePlate ] = useState('')
-  const [ vehicleCapacity, setVehicleCapacity ] = useState('')
-  const [ vehicleType, setVehicleType ] = useState('')
-
-
-  const { captain, setCaptain } = React.useContext(CaptainDataContext)
+  const [vehicleColor, setVehicleColor] = useState('')
+  const [vehiclePlate, setVehiclePlate] = useState('')
+  const [vehicleCapacity, setVehicleCapacity] = useState('')
+  const [vehicleType, setVehicleType] = useState('')
 
 
-  const submitHandler = async (e) => {
+  const { setCaptain } = useCaptainContext()
+
+
+  const submitHandler = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const captainData = {
       fullname: {

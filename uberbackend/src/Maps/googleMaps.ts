@@ -8,11 +8,10 @@ interface Coordinates {
 export const getCoordinatesByAddress = async (address: string): Promise<Coordinates | null> => {
     const apiKey = process.env.GOOGLE_MAPS_API;
     const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${apiKey}`;
-    console.log("uri", url)
+
     try {
         const response = await axios.get(url);
         const data = response.data;
-        console.log("this is location", data)
 
         if (data.status === 'OK' && data.results.length > 0) {
             const location = data.results[0].geometry.location;
@@ -34,13 +33,12 @@ export const getDistanceTimebyOriginDestination = async ({
 
     const apiKey = process.env.GOOGLE_MAPS_API;
     const url = `https://maps.googleapis.com/maps/api/distancematrix/json?origins=${encodeURIComponent(origin)}&destinations=${encodeURIComponent(destination)}&key=${apiKey}`;
-    console.log(url)
     try {
         const response = await axios.get(url);
         const data = response.data;
-        console.log("this is distance and time", data)
 
         if (data.status === 'OK' && data.rows.length > 0 && data.rows[0].elements.length > 0) {
+
 
             const element = data.rows[0].elements[0];
             if (element.status === 'OK') {
@@ -68,7 +66,6 @@ export const getSuggestionsByInput = async (input: string): Promise<string[] | n
     try {
         const response = await axios.get(url);
         const data = response.data;
-        console.log("this is suggestion", data);
 
         if (data.status === 'OK' && data.predictions.length > 0) {
             return data.predictions;

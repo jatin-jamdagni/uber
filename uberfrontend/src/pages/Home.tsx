@@ -1,12 +1,11 @@
-import React, { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import axios from 'axios';
 import 'remixicon/fonts/remixicon.css'
- 
-import { SocketContext } from '../context/SocketContext';
-import { useContext } from 'react';
-import { UserDataContext } from '../context/UserContext';
+
+import useSocketContext from '../context/SocketContext';
+import useUserContext from '../context/UserContext';
 import { useNavigate } from 'react-router';
 import LiveTracking from '../components/LiveTracking';
 import LocationSearchPanel from '../components/LocationSearchPanel';
@@ -14,36 +13,41 @@ import VehiclePanel from '../components/VehiclePanel';
 import ConfirmRide from '../components/ConfirmRide';
 import LookingForDriver from '../components/LookingForDriver';
 import WaitingForDriver from '../components/WaitingForDriver';
- 
+import { vechileTypeProps } from '../types';
+
 const Home = () => {
-    const [ pickup, setPickup ] = useState('')
-    const [ destination, setDestination ] = useState('')
-    const [ panelOpen, setPanelOpen ] = useState(false)
+    const [pickup, setPickup] = useState('')
+    const [destination, setDestination] = useState('')
+    const [panelOpen, setPanelOpen] = useState(false)
     const vehiclePanelRef = useRef(null)
     const confirmRidePanelRef = useRef(null)
     const vehicleFoundRef = useRef(null)
     const waitingForDriverRef = useRef(null)
     const panelRef = useRef(null)
     const panelCloseRef = useRef(null)
-    const [ vehiclePanel, setVehiclePanel ] = useState(false)
-    const [ confirmRidePanel, setConfirmRidePanel ] = useState(false)
-    const [ vehicleFound, setVehicleFound ] = useState(false)
-    const [ waitingForDriver, setWaitingForDriver ] = useState(false)
-    const [ pickupSuggestions, setPickupSuggestions ] = useState([])
-    const [ destinationSuggestions, setDestinationSuggestions ] = useState([])
-    const [ activeField, setActiveField ] = useState(null)
-    const [ fare, setFare ] = useState({})
-    const [ vehicleType, setVehicleType ] = useState(null)
-    const [ ride, setRide ] = useState(null)
+    const [vehiclePanel, setVehiclePanel] = useState<boolean>(false)
+    const [confirmRidePanel, setConfirmRidePanel] = useState<boolean>(false)
+    const [vehicleFound, setVehicleFound] = useState(false)
+    const [waitingForDriver, setWaitingForDriver] = useState(false)
+    const [pickupSuggestions, setPickupSuggestions] = useState([])
+    const [destinationSuggestions, setDestinationSuggestions] = useState([])
+    const [activeField, setActiveField] = useState<"destination" | "pickup">("pickup")
+    const [fare, setFare] = useState<Record<vechileTypeProps, number>>({
+        "CAR": 0,
+        "AUTO": 0,
+        "BIKE": 0
+    });
+    const [vehicleType, setVehicleType] = useState<vechileTypeProps | undefined>(undefined)
+    const [ride, setRide] = useState(null)
 
     const navigate = useNavigate()
 
-    const { socket } = useContext(SocketContext)
-    const { user } = useContext(UserDataContext)
+    const { socket } = useSocketContext()
+    const { user } = useUserContext();
 
     useEffect(() => {
-        socket.emit("join", { userType: "user", userId: user._id })
-    }, [ user ])
+        socket.emit("join", { userType: "user", userId: user?.id })
+    }, [user])
 
     socket.on('ride-confirmed', ride => {
 
@@ -60,10 +64,11 @@ const Home = () => {
     })
 
 
-    const handlePickupChange = async (e) => {
+    const handlePickupChange = async (e: any) => {
         setPickup(e.target.value)
         try {
             const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/maps/get-suggestions`, {
+
                 params: { input: e.target.value },
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem('token')}`
@@ -76,7 +81,7 @@ const Home = () => {
         }
     }
 
-    const handleDestinationChange = async (e) => {
+    const handleDestinationChange = async (e: any) => {
         setDestination(e.target.value)
         try {
             const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/maps/get-suggestions`, {
@@ -91,7 +96,7 @@ const Home = () => {
         }
     }
 
-    const submitHandler = (e) => {
+    const submitHandler = (e: any) => {
         e.preventDefault()
     }
 
@@ -115,7 +120,7 @@ const Home = () => {
                 opacity: 0
             })
         }
-    }, [ panelOpen ])
+    }, [panelOpen])
 
 
     useGSAP(function () {
@@ -128,7 +133,7 @@ const Home = () => {
                 transform: 'translateY(100%)'
             })
         }
-    }, [ vehiclePanel ])
+    }, [vehiclePanel])
 
     useGSAP(function () {
         if (confirmRidePanel) {
@@ -140,7 +145,7 @@ const Home = () => {
                 transform: 'translateY(100%)'
             })
         }
-    }, [ confirmRidePanel ])
+    }, [confirmRidePanel])
 
     useGSAP(function () {
         if (vehicleFound) {
@@ -152,7 +157,7 @@ const Home = () => {
                 transform: 'translateY(100%)'
             })
         }
-    }, [ vehicleFound ])
+    }, [vehicleFound])
 
     useGSAP(function () {
         if (waitingForDriver) {
@@ -164,36 +169,45 @@ const Home = () => {
                 transform: 'translateY(100%)'
             })
         }
-    }, [ waitingForDriver ])
+    }, [waitingForDriver])
 
 
     async function findTrip() {
         setVehiclePanel(true)
         setPanelOpen(false)
 
-        const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/rides/get-fare`, {
-            params: { pickup, destination },
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem('token')}`
-            }
-        })
+        try {
+            const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/rides/get-fare`, {
+                params: { pickup, destination },
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('token')}`
+                }
+            });
+            setFare(response.data);
+        } catch (error: any) {
+            console.error("Error fetching fare:", error.response ? error.response.data : error.message);
+        }
 
 
-        setFare(response.data)
 
 
     }
 
     async function createRide() {
-        const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/rides/create`, {
-            pickup,
-            destination,
-            vehicleType
-        }, {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem('token')}`
-            }
-        })
+        try {
+
+            await axios.post(`${import.meta.env.VITE_BASE_URL}/rides/create-ride`, {
+                pickup,
+                destination,
+                vehicleType
+            }, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('token')}`
+                }
+            })
+        } catch (err: any) {
+            console.log(err)
+        }
 
 
     }

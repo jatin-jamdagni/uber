@@ -105,7 +105,7 @@ export const captainSigninController = async (req: Request<{}, {}, UserSigninBod
 
         return res.status(HTTP_STATUS.OK).json({
             message: MESSAGES.CAPTAIN_SIGNED_IN,
-            user: captainWithoutPassword,
+            captain: captainWithoutPassword,
             token,
         })
 

@@ -83,15 +83,16 @@ model Ride {
   id          Int        @id @default(autoincrement())
   user        User       @relation(fields: [userId], references: [id])
   userId      Int
-  captain     Captain    @relation(fields: [captainId], references: [id])
-  captainId   Int
+  captainId   Int?
+  captain     Captain?   @relation(fields: [captainId], references: [id])
   pickup      String
   destination String
   fare        Int
   status      RideStatus @default(PENDING)
-  duration    Int
-  distance    Int
+  duration    Int?
+  distance    Int?
   paymentId   String?
   orderId     String?
   signature   String?
+  otp         String
 }

@@ -1,13 +1,13 @@
-import React, { useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router'
- import { useGSAP } from '@gsap/react'
+import { useGSAP } from '@gsap/react'
 import gsap from 'gsap'
 import FinishRide from '../components/FinishRide'
 import LiveTracking from '../components/LiveTracking'
- 
+
 const CaptainRiding = () => {
 
-    const [ finishRidePanel, setFinishRidePanel ] = useState(false)
+    const [finishRidePanel, setFinishRidePanel] = useState(false)
     const finishRidePanelRef = useRef(null)
     const location = useLocation()
     const rideData = location.state?.ride
@@ -24,7 +24,7 @@ const CaptainRiding = () => {
                 transform: 'translateY(100%)'
             })
         }
-    }, [ finishRidePanel ])
+    }, [finishRidePanel])
 
 
     return (

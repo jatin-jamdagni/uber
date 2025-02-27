@@ -1,23 +1,31 @@
-/* eslint-disable react-refresh/only-export-components */
 import {
   createContext,
   useState,
   ReactNode,
   Dispatch,
   SetStateAction,
+  useContext,
 } from "react";
 
+// User Props interface
 interface UserProps {
+  id: number;
   email: string;
-  fullName: {
-    firstName: string;
-    lastName: string;
-  };
+  firstName: string;
+  lastName: string;
+  socketId: string | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
+// UserDataContext interface
 interface UserDataContextProps {
-  user: UserProps;
-  setUser: Dispatch<SetStateAction<UserProps>>;
+  user: UserProps | null;
+  setUser: Dispatch<SetStateAction<UserProps | null>>;
+  isLoading?: boolean;
+  setIsLoading?: Dispatch<SetStateAction<boolean>>;
+  error?: string | null;
+  setError?: Dispatch<SetStateAction<string | null>>;
 }
 
 // Create Context with a default value (can be undefined initially)
@@ -29,20 +37,35 @@ interface UserContextProps {
   children: ReactNode;
 }
 
-const UserContext = ({ children }: UserContextProps) => {
-  const [user, setUser] = useState<UserProps>({
-    email: "",
-    fullName: {
-      firstName: "",
-      lastName: "",
-    },
-  });
+// UserContext component to provide the state to children components
+export const UserContext = ({ children }: UserContextProps) => {
+  const [user, setUser] = useState<UserProps | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const value = {
+    user,
+    setUser,
+    isLoading,
+    setIsLoading,
+    error,
+    setError,
+  };
 
   return (
-    <UserDataContext.Provider value={{ user, setUser }}>
+    <UserDataContext.Provider value={value}>
       {children}
     </UserDataContext.Provider>
   );
 };
 
-export default UserContext;
+// Custom hook to consume the context
+const useUserContext = () => {
+  const context = useContext(UserDataContext);
+  if (!context) {
+    throw new Error('useUserContext must be used within a UserContext');
+  }
+  return context;
+};
+
+export default useUserContext;

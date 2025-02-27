@@ -1,4 +1,4 @@
-import   { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { LoadScript, GoogleMap, Marker } from '@react-google-maps/api'
 
 const containerStyle = {
@@ -12,7 +12,7 @@ const center = {
 };
 
 const LiveTracking = () => {
-    const [ currentPosition, setCurrentPosition ] = useState(center);
+    const [currentPosition, setCurrentPosition] = useState(center);
 
     useEffect(() => {
         navigator.geolocation.getCurrentPosition((position) => {

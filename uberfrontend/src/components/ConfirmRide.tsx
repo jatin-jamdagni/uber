@@ -1,14 +1,7 @@
 import React from "react";
+import { ConfirmRideProps } from "../types";
 
-interface ConfirmRideProps {
-  pickup: string;
-  destination: string;
-  fare: Record<string, number>;
-  vehicleType: string;
-  setConfirmRidePanel: (value: boolean) => void;
-  setVehicleFound: (value: boolean) => void;
-  createRide: () => void;
-}
+
 
 const ConfirmRide: React.FC<ConfirmRideProps> = (props) => {
   return (
@@ -48,9 +41,9 @@ const ConfirmRide: React.FC<ConfirmRideProps> = (props) => {
             <i className="ri-currency-line"></i>
             <div>
               <h3 className="text-lg font-medium">
-                ₹{props.fare[props.vehicleType]}
+                ₹{props.fare ? props.fare[props.vehicleType!] : "N/A"}
               </h3>
-              <p className="text-sm -mt-1 text-gray-600">Cash Cash</p>
+              <p className="text-sm -mt-1 text-gray-6s00">Cash Cash</p>
             </div>
           </div>
         </div>
