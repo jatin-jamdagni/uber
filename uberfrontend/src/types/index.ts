@@ -18,7 +18,6 @@ export interface SignInResponse {
 }
 
 
-
 export type vechileTypeProps = "AUTO" | "BIKE" | "CAR"
 export interface ConfirmRideProps {
     pickup: string;

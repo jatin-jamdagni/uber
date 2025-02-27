@@ -107,20 +107,16 @@ interface CaptainContextType {
 // Create the context
 export const CaptainDataContext = createContext<CaptainContextType | undefined>(undefined);
 
-// CaptainContext provider component
-export const CaptainContext = ({ children }: { children: React.ReactNode }) => {
-  // Initialize captain state as null, until the captain is authenticated
-  const [captain, setCaptain] = useState<Captain | null>(null);
+ export const CaptainContext = ({ children }: { children: React.ReactNode }) => {
+   const [captain, setCaptain] = useState<Captain | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>("");
 
-  // Function to update captain
-  const updateCaptain = (captainData: Captain) => {
+   const updateCaptain = (captainData: Captain) => {
     setCaptain(captainData);
   };
 
-  // Value to be provided via context
-  const value = {
+   const value = {
     captain,
     setCaptain,
     isLoading,
@@ -133,8 +129,7 @@ export const CaptainContext = ({ children }: { children: React.ReactNode }) => {
   return <CaptainDataContext.Provider value={value}>{children}</CaptainDataContext.Provider>;
 };
 
-// Hook to access the Captain context
-const useCaptainContext = () => {
+ const useCaptainContext = () => {
   const context = useContext(CaptainDataContext);
   if (!context) {
     throw new Error('useCaptainContext must be used within a CaptainContextProvider');
