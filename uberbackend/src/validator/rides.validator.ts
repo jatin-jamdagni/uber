@@ -17,3 +17,24 @@ export const CreateRideValidator = z.object({
 
 export type CreateRideProps = z.infer<typeof CreateRideValidator>
 
+
+
+export const ConfirmRideValidator = z.object({
+    rideId: z.number(),
+    captainId: z.number()
+})
+export type ConfirmRideProp = z.infer<typeof ConfirmRideValidator>
+
+
+export const StartRideValidator = z.object({
+    rideId: z.number(),
+    otp: z.string().min(6).max(6)
+})
+
+export type StartRideProps = z.infer<typeof StartRideValidator>;
+
+export const EndRideValidator = z.object({
+    rideId: z.number(),
+})
+
+export type EndRideProps = z.infer<typeof EndRideValidator>;

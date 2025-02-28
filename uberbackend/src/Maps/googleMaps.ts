@@ -26,25 +26,33 @@ export const getCoordinatesByAddress = async (address: string): Promise<Coordina
     }
 }
 
-
 export const getDistanceTimebyOriginDestination = async ({
     destination, origin
 }: getDistanceTimeBody): Promise<any> => {
 
     const apiKey = process.env.GOOGLE_MAPS_API;
     const url = `https://maps.googleapis.com/maps/api/distancematrix/json?origins=${encodeURIComponent(origin)}&destinations=${encodeURIComponent(destination)}&key=${apiKey}`;
+    
     try {
         const response = await axios.get(url);
         const data = response.data;
 
         if (data.status === 'OK' && data.rows.length > 0 && data.rows[0].elements.length > 0) {
-
-
             const element = data.rows[0].elements[0];
+            
             if (element.status === 'OK') {
+                const distance = element.distance.text;
+                const duration = element.duration.text;
+
+                // Convert distance (e.g., "87.2 km") to meters
+                const distanceInMeters = convertDistanceToMeters(distance);
+
+                // Convert duration (e.g., "1 hour 58 mins") to minutes
+                const durationInMinutes = convertDurationToMinutes(duration);
+
                 return {
-                    distance: element.distance.text,
-                    duration: element.duration.text
+                    distance: distanceInMeters, // distance in meters
+                    duration: durationInMinutes, // duration in minutes
                 };
             } else {
                 return null;
@@ -57,6 +65,28 @@ export const getDistanceTimebyOriginDestination = async ({
         console.error('Error fetching distance and time:', error);
         return null;
     }
+};
+
+// Convert distance (e.g., "87.2 km") to meters
+function convertDistanceToMeters(distance: string): number {
+    const match = distance.match(/(\d+(\.\d+)?)\s*(km|km\.)/i);
+    if (match) {
+        return parseFloat(match[1]) * 1000; // Convert km to meters
+    }
+    return 0;
+}
+
+// Convert duration (e.g., "1 hour 58 mins" or "1:58") to minutes
+function convertDurationToMinutes(duration: string): number {
+    const match = duration.match(/(\d+)(?: hour| hr| hrs)?(?: (\d+))? (?:min|minute|minutes)/i);
+    if (!match) {
+        return 0;
+    }
+
+    const hours = parseInt(match[1], 10) || 0;
+    const minutes = parseInt(match[2], 10) || 0;
+
+    return hours * 60 + minutes; // Return total duration in minutes
 }
 
 
