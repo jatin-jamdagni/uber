@@ -41,7 +41,7 @@ export interface ConfirmRideProps {
 
 
 export interface Ride {
-    id: number |null,
+    id: number | null,
     user: {
         firstName: string;
         lastName: string;
@@ -49,6 +49,8 @@ export interface Ride {
     pickup: string;
     destination: string;
     fare: number | null;
+    distance: number | null,
+    duration: number | null
 }
 
 export interface RidePopUpProps {

@@ -23,8 +23,9 @@ const CaptainHome = () => {
         user: {
             firstName: "",
             lastName: ""
-        }
-    });
+        },
+        distance:null,
+    duration:null    });
 
     const { socket } = useSocketContext();
     const { captain } = useCaptainContext(); // Ensure captain context is properly used
@@ -60,9 +61,14 @@ const CaptainHome = () => {
 
     useEffect(() => {
         socket.on('new-ride', (data) => {
+            console.log("this is data", data)
+            console.log(">>>>>>>>", data);
+
             setRide(data);
             setRidePopupPanel(true);
         });
+
+        console.log(">>>>>>>>", ride);
 
         return () => {
             socket.off('new-ride'); // Cleanup event listener
@@ -73,7 +79,7 @@ const CaptainHome = () => {
         if (!ride) return; // Ensure ride data is available
 
         await axios.post(
-            `${import.meta.env.VITE_BASE_URL}/rides/confirm`,
+            `${import.meta.env.VITE_BASE_URL}/rides/confirm-ride`,
             {
                 rideId: ride.id,
                 captainId: captain?.id,

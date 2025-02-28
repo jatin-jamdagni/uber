@@ -2,6 +2,8 @@ import { RidePopUpProps } from "../types"
 
 const RidePopUp = ({ ride, setConfirmRidePopupPanel, setRidePopupPanel, confirmRide }: RidePopUpProps
 ) => {
+
+
     return (
         <div>
             <h5 className='p-1 text-center w-[93%] absolute top-0' onClick={() => {
@@ -13,7 +15,15 @@ const RidePopUp = ({ ride, setConfirmRidePopupPanel, setRidePopupPanel, confirmR
                     <img className='h-12 rounded-full object-cover w-12' src="https://i.pinimg.com/236x/af/26/28/af26280b0ca305be47df0b799ed1b12b.jpg" alt="" />
                     <h2 className='text-lg font-medium'>{ride?.user.firstName + " " + ride?.user.lastName}</h2>
                 </div>
-                <h5 className='text-lg font-semibold'>2.2 KM</h5>
+                <div className=" flex flex-col justify-center space-y-2">
+                    <h5 className='text-lg font-semibold'>{(ride.distance!) / 1000} KM</h5>
+                    <h5 className='text-sm font-semibold'>
+                        {ride.duration! < 60
+                            ? `${ride.duration!} Minutes`
+                            : `${(ride.duration! / 60).toFixed(2)} Hours`}
+                    </h5>
+                </div>
+
             </div>
             <div className='flex gap-2 justify-between flex-col items-center'>
                 <div className='w-full mt-5'>
